@@ -2755,6 +2755,13 @@
           transform: none;
         }
       }
+
+       @media (max-width: 900px) {
+        header nav.mobile-menu {
+          display: block; /* cancels the blanket nav hide */
+          margin-left: 0; /* cancels desktop nav offset */
+        }
+      }
     </style>
   </head>
   <body>
