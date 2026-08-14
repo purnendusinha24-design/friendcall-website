@@ -22,24 +22,19 @@
     <style>
       /* ============ TOKENS (DARK DEFAULT — AppColors palette) ============ */
       :root {
-        /* backgrounds */
         --bg: #121214;
         --bg-alt: #1a1a1d;
         --card: #1e1e22;
         --card-hover: #252529;
-        /* text */
         --text: #f5f5f7;
         --text-2: #9a9aa0;
         --text-3: #6e6e73;
-        /* lines */
         --line: rgba(255, 255, 255, 0.08);
         --line-strong: rgba(255, 255, 255, 0.14);
-        /* inputs */
         --input: #2a2a2e;
         --avatar-bg: #253444;
         --avatar-text: #9cc0e8;
         --nav-ind: #2a3544;
-        /* brand */
         --primary: #2196f3;
         --primary-d: #42a5f5;
         --on-primary: #ffffff;
@@ -47,11 +42,9 @@
         --danger: #e53935;
         --gold: #ffb300;
         --pink: #e91e63;
-        /* shadows (soft elevation — matches app) */
         --sh-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
         --sh: 0 6px 20px rgba(0, 0, 0, 0.45);
         --sh-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
-        /* fonts */
         --disp: "Fraunces", serif;
         --body: "Instrument Sans", sans-serif;
         --mono: "Space Mono", monospace;
@@ -72,11 +65,6 @@
         --nav-ind: #e4edf9;
         --primary: #2196f3;
         --primary-d: #1976d2;
-        --on-primary: #ffffff;
-        --online: #35b86b;
-        --danger: #e53935;
-        --gold: #ffb300;
-        --pink: #e91e63;
         --sh-sm: 0 2px 6px rgba(17, 17, 26, 0.06);
         --sh: 0 6px 18px rgba(17, 17, 26, 0.08);
         --sh-lg: 0 14px 36px rgba(17, 17, 26, 0.12);
@@ -89,6 +77,7 @@
       }
       html {
         scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
       }
       body {
         background: var(--bg);
@@ -180,6 +169,7 @@
       .btn {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 0.55em;
         font-weight: 600;
         font-size: 0.95rem;
@@ -195,6 +185,7 @@
           background 0.2s,
           border-color 0.2s;
         line-height: 1.2;
+        min-height: 44px;
       }
       .btn:hover {
         transform: translateY(-2px);
@@ -258,14 +249,14 @@
         display: flex;
         align-items: center;
         gap: 26px;
-        padding: 16px 28px;
+        padding: 14px 28px;
       }
       .logo {
         display: flex;
         align-items: center;
         gap: 0.55em;
         font-family: var(--disp);
-        font-size: 1.35rem;
+        font-size: 1.3rem;
         font-weight: 700;
         letter-spacing: -0.02em;
         cursor: pointer;
@@ -299,7 +290,10 @@
         font-weight: 600;
         color: var(--text-2);
         position: relative;
-        padding: 4px 0;
+        padding: 8px 0;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
         transition: color 0.2s;
       }
       header nav a::after {
@@ -325,18 +319,18 @@
         gap: 10px;
       }
       .clockchip {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         border: 1.5px solid var(--line-strong);
         border-radius: 999px;
-        padding: 0.42em 0.9em;
+        padding: 0.45em 0.9em;
         background: var(--card);
         color: var(--text-2);
       }
 
       /* theme toggle */
       .theme-toggle {
-        width: 38px;
-        height: 38px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         border: 1.5px solid var(--line-strong);
         background: var(--card);
@@ -346,6 +340,7 @@
           background 0.2s,
           border-color 0.2s,
           transform 0.2s;
+        flex: none;
       }
       .theme-toggle:hover {
         background: var(--card-hover);
@@ -369,19 +364,141 @@
         display: block;
       }
 
+      /* hamburger */
+      .hamburger {
+        display: none;
+        width: 44px;
+        height: 44px;
+        border: 1.5px solid var(--line-strong);
+        border-radius: 10px;
+        background: var(--card);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        flex: none;
+      }
+      .hamburger span {
+        width: 18px;
+        height: 2px;
+        background: var(--text);
+        border-radius: 2px;
+        transition:
+          transform 0.3s,
+          opacity 0.3s;
+      }
+      .hamburger.open span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+      }
+      .hamburger.open span:nth-child(2) {
+        opacity: 0;
+      }
+      .hamburger.open span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+      }
+
+      /* mobile menu */
+      .mobile-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--card);
+        border-bottom: 1.5px solid var(--line-strong);
+        box-shadow: var(--sh-lg);
+        padding: 8px 20px 16px;
+        transform: translateY(-120%);
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+          transform 0.35s cubic-bezier(0.22, 0.9, 0.3, 1),
+          visibility 0s 0.35s;
+        z-index: 89;
+      }
+      .mobile-menu.open {
+        transform: none;
+        visibility: visible;
+        pointer-events: auto;
+        transition: transform 0.35s cubic-bezier(0.22, 0.9, 0.3, 1);
+      }
+      .mobile-menu a {
+        display: block;
+        padding: 14px 4px;
+        font-weight: 600;
+        font-size: 1.02rem;
+        color: var(--text);
+        border-bottom: 1px solid var(--line);
+        min-height: 44px;
+      }
+      .mobile-menu a:last-child {
+        border-bottom: none;
+      }
+      .mobile-menu a:hover {
+        color: var(--primary);
+      }
+
+      /* header swap: clock <-> download (mobile only) */
+      @keyframes swapIn {
+        from {
+          opacity: 0;
+          transform: translateY(-8px) scale(0.97);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
       @media (max-width: 900px) {
         header nav {
           display: none;
         }
-        .clockchip {
+        .hamburger {
+          display: flex;
+        }
+        .wrap {
+          padding: 0 20px;
+        }
+        .nav {
+          gap: 12px;
+          padding: 12px 16px;
+        }
+        .logo {
+          font-size: 1.2rem;
+        }
+        #hdrClock {
           display: none;
+        }
+        .nav-right.show-clock #hdrClock {
+          display: inline-block;
+        }
+        .nav-right.show-clock #hdrCall {
+          display: none;
+        }
+        #hdrClock,
+        #hdrCall {
+          animation: swapIn 0.45s ease;
+        }
+      }
+      @media (max-width: 480px) {
+        #hdrCall .btn-label {
+          display: none;
+        }
+        #hdrCall {
+          padding: 0.6em 0.8em;
+        }
+        .logo {
+          font-size: 1.1rem;
+        }
+        .clockchip {
+          font-size: 0.66rem;
+          padding: 0.4em 0.7em;
         }
       }
 
       /* ============ HERO ============ */
       .hero {
         position: relative;
-        padding: 64px 0 90px;
+        padding: 56px 0 80px;
         overflow: hidden;
       }
       .hero .wrap {
@@ -404,6 +521,8 @@
         display: inline-flex;
         gap: 0.7em;
         align-items: center;
+        font-size: 0.78rem;
+        color: var(--text-2);
       }
       .live-pill b {
         color: var(--primary);
@@ -421,7 +540,7 @@
         }
       }
       .hero h1 {
-        font-size: clamp(2.7rem, 5.6vw, 4.7rem);
+        font-size: clamp(2.4rem, 5.6vw, 4.4rem);
         margin: 0 0 22px;
       }
       .hero h1 .ln {
@@ -584,9 +703,6 @@
         margin-bottom: auto;
         letter-spacing: 0.06em;
       }
-      [data-theme="light"] .scr-status {
-        color: #4e4157;
-      }
       .scr-status #coinTop {
         color: var(--primary);
         font-weight: 700;
@@ -647,9 +763,6 @@
       [data-theme="light"] .scr-avs img {
         border-color: #fbf3e4;
       }
-      .scr-avs img:first-child {
-        margin-left: 0;
-      }
       .scr-who {
         font-size: 0.62rem;
         color: var(--text-3);
@@ -661,9 +774,6 @@
         margin-top: 16px;
         line-height: 1.7;
       }
-      [data-theme="light"] .scr-fine {
-        color: #7c6e84;
-      }
       @keyframes pulse {
         0% {
           transform: scale(0.92);
@@ -674,7 +784,6 @@
           opacity: 0;
         }
       }
-
       /* dialing */
       .dial-ava {
         position: relative;
@@ -717,16 +826,13 @@
         color: var(--text-3);
         letter-spacing: 0.08em;
       }
-      [data-theme="light"] .scr-role {
-        color: #7c6e84;
-      }
       #dialMsg {
         margin-top: 10px;
         font-size: 0.72rem;
         color: var(--primary);
         min-height: 1.4em;
+        font-family: var(--mono);
       }
-
       /* live */
       .live-top {
         display: flex;
@@ -747,7 +853,6 @@
         margin-left: auto;
         width: 10px;
         height: 10px;
-        background: var(--online);
       }
       .video-tile {
         display: none;
@@ -798,9 +903,6 @@
         font-size: 0.66rem;
         color: var(--text-2);
         margin-bottom: 6px;
-      }
-      [data-theme="light"] .coin-row {
-        color: #4e4157;
       }
       .coin-row b {
         color: var(--primary);
@@ -869,9 +971,6 @@
         padding: 0 6px;
         transition: opacity 0.4s;
       }
-      [data-theme="light"] .live-cap {
-        color: #4e4157;
-      }
       .live-ctrls {
         display: flex;
         justify-content: center;
@@ -900,11 +999,11 @@
         height: 20px;
         fill: var(--text);
       }
-      [data-theme="light"] .live-ctrls button svg {
-        fill: #251a2f;
-      }
       .live-ctrls button.toggled {
         background: var(--gold);
+      }
+      .live-ctrls button.toggled svg {
+        fill: #17171a;
       }
       .end-btn {
         background: var(--danger) !important;
@@ -916,7 +1015,6 @@
         fill: #fff;
         transform: rotate(135deg);
       }
-
       /* chat */
       .chat-box {
         flex: 1;
@@ -936,9 +1034,6 @@
         border: 1px solid var(--line-strong);
         animation: stateIn 0.3s ease both;
         color: var(--text);
-      }
-      [data-theme="light"] .bub {
-        color: #251a2f;
       }
       .bub.them {
         background: var(--card);
@@ -977,9 +1072,6 @@
         min-width: 0;
         font-family: var(--body);
       }
-      [data-theme="light"] .chat-input input {
-        color: #251a2f;
-      }
       .chat-input input:focus {
         outline: 2px solid var(--primary);
       }
@@ -1015,14 +1107,12 @@
         background: var(--card-hover);
         color: var(--text);
       }
-
       /* ended */
       .end-star {
         font-size: 2rem;
         color: var(--gold);
         margin-bottom: 8px;
       }
-
       /* stickers */
       .stick {
         position: absolute;
@@ -1265,6 +1355,8 @@
       @media (max-width: 760px) {
         .log-row {
           grid-template-columns: 80px 1fr 90px;
+          padding: 12px 16px;
+          gap: 10px;
         }
         .log-row .log-chip,
         .log-row .log-note,
@@ -1381,7 +1473,7 @@
       .step-tags span {
         font-family: var(--mono);
         font-size: 0.68rem;
-        border: 1px solid var(--line-strong);
+        border: 1.5px solid var(--line-strong);
         border-radius: 999px;
         padding: 0.4em 1em;
         color: var(--text-2);
@@ -1419,6 +1511,7 @@
         color: var(--text-2);
         box-shadow: var(--sh-sm);
         transition: all 0.18s;
+        min-height: 40px;
       }
       .chip:hover {
         transform: translate(-1px, -1px);
@@ -1538,6 +1631,7 @@
         padding: 0.55em 1.1em;
         transition: all 0.18s;
         white-space: nowrap;
+        min-height: 38px;
       }
       .fbtn:hover {
         transform: translateY(-2px);
@@ -1713,11 +1807,12 @@
         color: var(--on-primary);
         border: none;
         border-radius: 999px;
-        padding: 0.5em 1.1em;
+        padding: 0.6em 1.1em;
         box-shadow: var(--sh-sm);
         transition:
           transform 0.15s,
           background 0.2s;
+        min-height: 38px;
       }
       .ring-btn:hover {
         transform: translateY(-2px);
@@ -1883,6 +1978,19 @@
         .stat:nth-child(3) {
           border-left: none;
           padding-left: 0;
+        }
+      }
+      @media (max-width: 480px) {
+        .stats .wrap {
+          grid-template-columns: 1fr;
+        }
+        .stat {
+          padding: 14px 0;
+          border-left: none;
+          border-bottom: 1px dashed rgba(255, 255, 255, 0.25);
+        }
+        .stat:last-child {
+          border-bottom: none;
         }
       }
 
@@ -2087,6 +2195,33 @@
           grid-template-columns: 1fr;
         }
       }
+      @media (max-width: 480px) {
+        .plan-feat {
+          padding: 28px 22px;
+        }
+        .plan-feat::after {
+          left: 22px;
+          right: 22px;
+        }
+        .stamp {
+          width: 80px;
+          height: 80px;
+          top: -20px;
+          right: 16px;
+          font-size: 0.5rem;
+        }
+        .rate-row {
+          gap: 10px;
+        }
+        .rate-ico {
+          width: 40px;
+          height: 40px;
+          font-size: 1.05rem;
+        }
+        .rate-price {
+          font-size: 1.2rem;
+        }
+      }
 
       /* ============ SAFETY ============ */
       .safety {
@@ -2126,16 +2261,20 @@
         font-size: 0.7rem;
         border: 1px solid var(--line-strong);
         border-radius: 999px;
-        padding: 0.5em 1em;
+        padding: 0.55em 1em;
         background: var(--nav-ind);
         color: var(--avatar-text);
         box-shadow: var(--sh-sm);
-        transition: background 0.2s;
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        transition:
+          background 0.2s,
+          color 0.2s;
       }
       .safety-links a:hover {
         background: var(--primary);
         color: var(--on-primary);
-        border-color: var(--primary);
       }
       .safety-icon {
         font-size: 2rem;
@@ -2151,6 +2290,7 @@
       @media (max-width: 600px) {
         .safety-box {
           grid-template-columns: 1fr;
+          padding: 22px 18px;
         }
       }
 
@@ -2257,7 +2397,7 @@
         border-radius: 12px;
         padding: 0.85em 1em;
         font-family: var(--body);
-        font-size: 0.95rem;
+        font-size: 16px;
         background: var(--input);
         color: var(--text);
         min-height: 48px;
@@ -2271,7 +2411,6 @@
       }
       .form-row textarea {
         resize: vertical;
-        font-family: var(--body);
         line-height: 1.5;
       }
       .chip-group {
@@ -2302,7 +2441,6 @@
       }
       .form-chip:hover span {
         transform: translateY(-1px);
-        background: var(--card-hover);
         color: var(--text);
       }
       .form-chip input:checked + span {
@@ -2440,6 +2578,9 @@
         font-size: 0.9rem;
         color: var(--text-2);
         transition: color 0.2s;
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
       }
       footer ul a:hover {
         color: var(--primary);
@@ -2452,6 +2593,7 @@
       .news form {
         display: flex;
         gap: 8px;
+        flex-wrap: wrap;
       }
       .news input {
         flex: 1;
@@ -2459,10 +2601,10 @@
         border-radius: 999px;
         padding: 0.7em 1.2em;
         font-family: var(--body);
-        font-size: 0.88rem;
+        font-size: 16px;
         background: var(--input);
         color: var(--text);
-        min-width: 0;
+        min-width: 160px;
       }
       .news input:focus {
         outline: 2px solid var(--primary);
@@ -2504,8 +2646,8 @@
       /* ============ FLOAT + TOAST ============ */
       .float-call {
         position: fixed;
-        right: 24px;
-        bottom: 24px;
+        right: 20px;
+        bottom: 20px;
         z-index: 80;
         display: flex;
         align-items: center;
@@ -2519,6 +2661,7 @@
         box-shadow: 0 10px 28px rgba(33, 150, 243, 0.4);
         transform: translateY(180%);
         transition: transform 0.5s cubic-bezier(0.22, 0.9, 0.3, 1);
+        min-height: 48px;
       }
       .float-call.show {
         transform: none;
@@ -2540,12 +2683,14 @@
       }
       .toasts {
         position: fixed;
-        left: 24px;
-        bottom: 24px;
+        left: 16px;
+        bottom: 80px;
         z-index: 95;
         display: flex;
         flex-direction: column;
         gap: 10px;
+        max-width: calc(100vw - 32px);
+        pointer-events: none;
       }
       .toast {
         background: var(--card);
@@ -2558,6 +2703,7 @@
         box-shadow: var(--sh-lg);
         animation: toastIn 0.4s ease both;
         max-width: 320px;
+        pointer-events: auto;
       }
       .toast b {
         color: var(--gold);
@@ -2576,6 +2722,17 @@
         opacity: 0;
         transform: translateY(8px);
         transition: all 0.4s;
+      }
+      @media (min-width: 901px) {
+        .toasts {
+          left: 24px;
+          bottom: 24px;
+          max-width: 340px;
+        }
+        .float-call {
+          right: 24px;
+          bottom: 24px;
+        }
       }
 
       /* ============ REDUCED MOTION ============ */
@@ -2620,8 +2777,16 @@
           <a href="#stories">Stories</a>
           <a href="#pricing">Coins</a>
         </nav>
-        <div class="nav-right">
+        <div class="nav-right" id="navRight">
           <span class="clockchip mono" id="hdrClock">—:—:— IST</span>
+          <button class="btn btn-primary btn-sm" id="hdrCall">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"
+              />
+            </svg>
+            <span class="btn-label">Download App</span>
+          </button>
           <button
             class="theme-toggle"
             id="themeToggle"
@@ -2636,16 +2801,25 @@
               <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
             </svg>
           </button>
-          <button class="btn btn-primary btn-sm" id="hdrCall">
-            <svg viewBox="0 0 24 24">
-              <path
-                d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"
-              />
-            </svg>
-            Download App
+          <button
+            class="hamburger"
+            id="hamburger"
+            aria-label="Menu"
+            aria-expanded="false"
+            aria-controls="mobileMenu"
+          >
+            <span></span><span></span><span></span>
           </button>
         </div>
       </div>
+      <nav class="mobile-menu" id="mobileMenu">
+        <a href="#line">The line</a>
+        <a href="#how">How it works</a>
+        <a href="#listeners">Listeners</a>
+        <a href="#stories">Stories</a>
+        <a href="#pricing">Coins</a>
+        <a href="#become-listener">Become a listener</a>
+      </nav>
     </header>
 
     <!-- ================= HERO ================= -->
@@ -3994,7 +4168,7 @@
         const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
         const inr = (n) => n.toLocaleString("en-IN");
 
-        /* ---------- THEME TOGGLE ---------- */
+        /* ---------- THEME TOGGLE (dark default) ---------- */
         const themeToggle = $("#themeToggle");
         const savedTheme = localStorage.getItem("theme") || "dark";
         document.documentElement.setAttribute("data-theme", savedTheme);
@@ -4059,6 +4233,32 @@
             : hr < 17
               ? "GOOD AFTERNOON"
               : "GOOD EVENING") + " ✦ THE LINE IS OPEN";
+
+        /* ---------- HEADER SWAP: clock <-> download every 5s (mobile) ---------- */
+        const navRight = $("#navRight");
+        let showClockPhase = false; /* start with Download visible */
+        function applySwap() {
+          navRight.classList.toggle("show-clock", showClockPhase);
+          showClockPhase = !showClockPhase;
+        }
+        applySwap();
+        setInterval(applySwap, 5000);
+
+        /* ---------- hamburger / mobile menu ---------- */
+        const hamburger = $("#hamburger");
+        const mobileMenu = $("#mobileMenu");
+        hamburger.addEventListener("click", () => {
+          const isOpen = hamburger.classList.toggle("open");
+          mobileMenu.classList.toggle("open", isOpen);
+          hamburger.setAttribute("aria-expanded", isOpen);
+        });
+        $$("#mobileMenu a").forEach((a) =>
+          a.addEventListener("click", () => {
+            hamburger.classList.remove("open");
+            mobileMenu.classList.remove("open");
+            hamburger.setAttribute("aria-expanded", "false");
+          }),
+        );
 
         /* ---------- live listener count ---------- */
         let count = 2914;
@@ -4185,8 +4385,7 @@
           lastSpent = 0,
           lastDur = 0,
           capIdx = 0;
-        let demoInterval,
-          callInterval,
+        let callInterval,
           capInterval,
           timeouts = [];
         function later(fn, ms) {
@@ -4328,7 +4527,7 @@
           callInterval = capInterval = null;
         }
         runDemo();
-        demoInterval = setInterval(runDemo, 8000);
+        setInterval(runDemo, 8000);
 
         /* ---------- demo phone controls ---------- */
         $("#btnMute").addEventListener("click", function () {
@@ -4340,6 +4539,45 @@
           const on = this.classList.toggle("toggled");
           this.setAttribute("aria-pressed", on);
         });
+
+        /* ---------- interactive chat (user can type during chat phase) ---------- */
+        function sendUserChat(text) {
+          if ($("#stChat").hidden) return;
+          text = (text || "").trim();
+          if (!text) return;
+          balance = Math.max(0, balance - 5);
+          spentThisCall += 5;
+          updateCoins();
+          addBub("me", text);
+          later(
+            () =>
+              addBub(
+                "them",
+                chatReplies[(Math.random() * chatReplies.length) | 0],
+              ),
+            reduced ? 100 : 1100,
+          );
+        }
+        $("#chatSend").addEventListener("click", () => {
+          sendUserChat($("#chatIn").value);
+          $("#chatIn").value = "";
+        });
+        $("#chatIn").addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            sendUserChat(e.target.value);
+            e.target.value = "";
+          }
+        });
+        $$(".chat-chips button").forEach((b) =>
+          b.addEventListener("click", () => sendUserChat(b.dataset.m)),
+        );
+        $$(".vmail-play").forEach((p) =>
+          p.addEventListener("click", () =>
+            toast(
+              "<b>Full voicemail plays in the app</b> — download to hear it ✦",
+            ),
+          ),
+        );
 
         /* ---------- download buttons ---------- */
         function downloadClick() {
@@ -4646,17 +4884,20 @@
           );
         });
 
-        /* ---------- header / floating ---------- */
+        /* ---------- header scroll + floating button (always visible, incl. hero) ---------- */
         const hdr = $("#hdr"),
           floatBtn = $("#floatCall");
         window.addEventListener(
           "scroll",
           () => {
             hdr.classList.toggle("scrolled", window.scrollY > 10);
-            floatBtn.classList.toggle("show", window.scrollY > 620);
           },
           { passive: true },
         );
+        setTimeout(
+          () => floatBtn.classList.add("show"),
+          600,
+        ); /* shows in hero, stays everywhere */
 
         /* ---------- logo always scrolls to hero ---------- */
         $(".logo").addEventListener("click", function (e) {
