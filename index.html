@@ -369,94 +369,13 @@
         display: block;
       }
 
-      /* ============ MOBILE HEADER FIX ============ */
       @media (max-width: 900px) {
         header nav {
           display: none;
         }
         .clockchip {
-          display: inline-block; /* Makes the time visible again */
-          font-size: 0.68rem;
-          padding: 0.4em 0.75em;
+          display: none;
         }
-        .hamburger {
-          display: flex;
-        }
-      }
-
-      /* Hamburger Button */
-      .hamburger {
-        display: none;
-        width: 44px;
-        height: 44px;
-        border: 1.5px solid var(--ink);
-        border-radius: 10px;
-        background: var(--paper);
-        box-shadow: 3px 3px 0 var(--ink);
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        cursor: pointer;
-        margin-left: 4px;
-      }
-      .hamburger span {
-        width: 18px;
-        height: 2px;
-        background: var(--ink);
-        border-radius: 2px;
-        transition:
-          transform 0.3s,
-          opacity 0.3s;
-      }
-      .hamburger.open span:nth-child(1) {
-        transform: translateY(7px) rotate(45deg);
-      }
-      .hamburger.open span:nth-child(2) {
-        opacity: 0;
-      }
-      .hamburger.open span:nth-child(3) {
-        transform: translateY(-7px) rotate(-45deg);
-      }
-
-      /* Mobile Dropdown Menu */
-      .mobile-menu {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: var(--paper);
-        border-bottom: 1.5px solid var(--ink);
-        box-shadow: 0 8px 0 rgba(37, 26, 47, 0.08);
-        padding: 10px 28px 20px;
-        transform: translateY(-120%);
-        visibility: hidden;
-        pointer-events: none;
-        transition:
-          transform 0.35s cubic-bezier(0.22, 0.9, 0.3, 1),
-          visibility 0s 0.35s;
-        z-index: 89;
-      }
-      .mobile-menu.open {
-        transform: none;
-        visibility: visible;
-        pointer-events: auto;
-        transition: transform 0.35s cubic-bezier(0.22, 0.9, 0.3, 1);
-      }
-      .mobile-menu a {
-        display: block;
-        padding: 16px 0;
-        font-weight: 600;
-        font-size: 1.1rem;
-        color: var(--ink);
-        border-bottom: 1px dashed var(--line);
-        min-height: 44px; /* Good touch target for mobile */
-      }
-      .mobile-menu a:last-child {
-        border-bottom: none;
-      }
-      .mobile-menu a:hover {
-        color: var(--coral);
       }
 
       /* ============ HERO ============ */
@@ -2725,22 +2644,7 @@
             </svg>
             Download App
           </button>
-          <button
-            class="hamburger"
-            id="hamburger"
-            aria-label="Menu"
-            aria-expanded="false"
-          >
-            <span></span><span></span><span></span>
-          </button>
         </div>
-        <nav class="mobile-menu" id="mobileMenu">
-          <a href="#line">The line</a>
-          <a href="#how">How it works</a>
-          <a href="#listeners">Listeners</a>
-          <a href="#stories">Stories</a>
-          <a href="#pricing">Coins</a>
-        </nav>
       </div>
     </header>
 
@@ -4743,26 +4647,6 @@
         });
 
         /* ---------- header / floating ---------- */
-        /* ---------- mobile menu toggle ---------- */
-        const hamburger = $("#hamburger");
-        const mobileMenu = $("#mobileMenu");
-        if (hamburger && mobileMenu) {
-          hamburger.addEventListener("click", () => {
-            const isOpen = hamburger.classList.toggle("open");
-            mobileMenu.classList.toggle("open", isOpen);
-            hamburger.setAttribute("aria-expanded", isOpen);
-          });
-
-          // Close menu when a link is clicked
-          $$("#mobileMenu a").forEach((a) => {
-            a.addEventListener("click", () => {
-              hamburger.classList.remove("open");
-              mobileMenu.classList.remove("open");
-              hamburger.setAttribute("aria-expanded", "false");
-            });
-          });
-        }
-
         const hdr = $("#hdr"),
           floatBtn = $("#floatCall");
         window.addEventListener(
