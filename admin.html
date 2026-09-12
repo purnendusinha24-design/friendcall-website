@@ -20,7 +20,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
 [hidden]{display:none!important}
 .mono{font-family:var(--mono)}
 .wrap{max-width:980px;margin:0 auto;padding:0 20px}
-/* top bar */
 .top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
 .top-in{display:flex;align-items:center;gap:14px;padding:14px 20px;flex-wrap:wrap}
 .brand{font-family:var(--disp);font-size:1.2rem;font-weight:700}
@@ -28,18 +27,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
 .brand .desk{font-family:var(--mono);font-size:.7rem;color:var(--t3);letter-spacing:.14em;text-transform:uppercase}
 .who{margin-left:auto;display:flex;align-items:center;gap:10px}
 .who span{font-size:.72rem;color:var(--t2)}
-/* buttons */
 .btn{display:inline-flex;align-items:center;gap:.5em;font-weight:600;font-size:.85rem;border:1.5px solid var(--line2);border-radius:999px;padding:.55em 1.1em;background:var(--card);color:var(--text);transition:transform .15s,background .2s;min-height:38px;cursor:pointer}
 .btn:hover{transform:translateY(-1px);background:var(--card2)}
 .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-.btn.primary:hover{background:#42a5f5}
 .btn.ghost{background:transparent}
 .btn.sm{font-size:.75rem;padding:.45em .9em;min-height:34px}
-/* setup note */
-.note{margin:26px 0;border:1px solid var(--line2);border-left:8px solid var(--gold);border-radius:12px;background:var(--card);padding:20px 22px;font-size:.9rem;color:var(--t2)}
-.note b{color:var(--text)}
-.note ol{margin:10px 0 0 18px}
-.note code{font-family:var(--mono);font-size:.78rem;color:var(--sky)}
 /* login */
 .login{max-width:400px;margin:8vh auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px 30px}
 .login h1{font-family:var(--disp);font-size:1.9rem;margin-bottom:6px}
@@ -54,16 +46,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
 .search{flex:1;min-width:200px;background:var(--input);border:1.5px solid var(--line2);border-radius:999px;padding:.65em 1.1em;color:var(--text);font-family:var(--body);font-size:.9rem}
 .search:focus{outline:2px solid var(--blue)}
 .live{font-size:.68rem;color:var(--t3)}
-/* read-denied banner */
-.denied{margin:0 0 14px;border:1px solid var(--line2);border-left:8px solid var(--red);border-radius:12px;background:var(--card);padding:14px 16px;font-size:.85rem;color:var(--t2)}
-.denied b{color:var(--text)}
-.denied pre{margin-top:10px;background:var(--input);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:.72rem;color:var(--t2);overflow-x:auto;white-space:pre}
-/* stats pills */
+.loadline{font-family:var(--mono);font-size:.72rem;color:var(--sky);margin:0 0 14px;display:flex;align-items:center;gap:.6em}
+.loadline::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--sky);animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.banner{margin:0 0 14px;border:1px solid var(--line2);border-left:8px solid var(--red);border-radius:12px;background:var(--card);padding:14px 16px;font-size:.85rem;color:var(--t2)}
+.banner b{color:var(--text)}
+.banner pre{margin-top:10px;background:var(--input);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:.72rem;color:var(--t2);overflow-x:auto;white-space:pre}
+.banner.js{border-left-color:var(--gold)}
 .stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
 .pill{font-family:var(--mono);font-size:.7rem;border:1.5px solid var(--line2);border-radius:999px;padding:.45em 1em;background:var(--card);color:var(--t2);cursor:pointer;transition:all .15s}
 .pill b{color:var(--c,var(--blue));margin-left:.4em}
 .pill.sel{border-color:var(--c,var(--blue));color:var(--text);background:var(--card2)}
-/* cards */
 .list{display:flex;flex-direction:column;gap:16px;padding-bottom:60px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
 .c-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -80,11 +73,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
 .st:hover{color:var(--text);border-color:var(--c)}
 .st.on{background:var(--c);border-color:var(--c);color:#121214;font-weight:700}
 .empty{text-align:center;color:var(--t3);font-family:var(--mono);font-size:.8rem;padding:40px 0}
-.empty a.elink{color:var(--blue);text-decoration:underline}
-/* toast */
+.empty a{color:var(--blue);text-decoration:underline}
 #flash{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);background:var(--card2);border:1px solid var(--line2);border-radius:999px;padding:.6em 1.3em;font-family:var(--mono);font-size:.72rem;color:var(--text);transition:transform .35s;z-index:50}
 #flash.show{transform:translateX(-50%) translateY(0)}
-@media (max-width:560px){ .c-meta{gap:10px} .login{margin:4vh 12px} }
+@media (max-width:560px){.c-meta{gap:10px}.login{margin:4vh 12px}}
 </style>
 </head>
 <body>
@@ -100,16 +92,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
 </header>
 
 <main class="wrap">
-  <section class="note" id="setupNote" hidden>
-    <b>One-time setup.</b> This page needs your Firebase web config and an admin user:
-    <ol>
-      <li>Firebase console → <b>Authentication → Sign-in method</b> → enable <b>Email/Password</b>.</li>
-      <li><b>Authentication → Users → Add user</b> → your email + password.</li>
-      <li><b>Project settings → Your apps → Web app</b> → copy <code>firebaseConfig</code> into this file.</li>
-      <li>Publish the Realtime Database rules shown in the red banner (if it appears).</li>
-    </ol>
-  </section>
-
   <section class="login" id="loginCard" hidden>
     <h1>Listener Desk</h1>
     <p class="sub">Sign in to review listener applications.</p>
@@ -127,7 +109,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
       <span class="live mono" id="connState">…</span>
       <span class="live mono" id="lastSync"></span>
     </div>
-    <div class="denied" id="readErr" hidden>
+    <p class="loadline" id="loadLine" hidden>listening…</p>
+    <div class="banner js" id="jsErr" hidden><b>Page error:</b> <span id="jsErrMsg"></span></div>
+    <div class="banner" id="readErr" hidden>
       <b>Read denied (<span id="readErrCode"></span>).</b>
       Firebase console → Realtime Database → Rules → publish this (keep your other nodes untouched):
       <pre>"listener_applications": {
@@ -139,7 +123,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     </div>
     <div class="stats" id="stats"></div>
     <div class="list" id="list"></div>
-    <p class="empty" id="empty" hidden>no applications match ✦</p>
+    <p class="empty" id="empty" hidden>no applications yet ✦</p>
   </section>
 </main>
 
@@ -154,7 +138,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
 
-  /* ✅ FIREBASE CONFIG WIRED IN */
+  /* ✅ your web app config */
   const firebaseConfig = {
     apiKey: "AIzaSyAsvZQy7bgbTzeKTd6XYAqQnk-xySEmtCk",
     authDomain: "friendcall-1b979.firebaseapp.com",
@@ -165,10 +149,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     appId: "1:874370740998:web:200dedf989833fa6212487",
     measurementId: "G-RNP2M5DB56"
   };
-
-  const CONFIG_OK = !String(firebaseConfig.apiKey).startsWith("PASTE");
-  if (!CONFIG_OK) $("#setupNote").hidden = false;
-
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.database();
@@ -189,6 +169,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     clearTimeout(f._t);
     f._t = setTimeout(() => f.classList.remove("show"), 2200);
   }
+  function showJsErr(msg) {
+    $("#jsErrMsg").textContent = msg;
+    $("#jsErr").hidden = false;
+    $("#loadLine").hidden = true;
+  }
+  /* surface ANY uncaught error instead of failing silently */
+  window.addEventListener("error", (e) => showJsErr(e.message || String(e.error)));
+  window.addEventListener("unhandledrejection", (e) => showJsErr(String((e.reason && e.reason.message) || e.reason)));
 
   function waLink(phone) {
     const d = String(phone || "").replace(/\D/g, "");
@@ -209,7 +197,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     } else {
       $("#board").hidden = true;
       $("#whoBar").hidden = true;
-      $("#loginCard").hidden = !CONFIG_OK;
+      $("#loginCard").hidden = false;
     }
   });
 
@@ -217,8 +205,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     e.preventDefault();
     $("#loginErr").textContent = "";
     $("#loginBtn").disabled = true;
-    auth
-      .signInWithEmailAndPassword($("#loginEmail").value.trim(), $("#loginPass").value)
+    auth.signInWithEmailAndPassword($("#loginEmail").value.trim(), $("#loginPass").value)
       .catch((err) => {
         const msgs = {
           "auth/invalid-credential": "Wrong email or password.",
@@ -231,7 +218,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
         $("#loginBtn").disabled = false;
       });
   });
-
   $("#signOut").addEventListener("click", () => auth.signOut());
 
   /* ---------- connection state ---------- */
@@ -243,14 +229,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     });
   }
 
-  /* ---------- live data (with node auto-probe) ---------- */
+  /* ---------- live data (never silent) ---------- */
   function subscribe() {
-    if (queryRef) queryRef.off();
-    queryRef = db.ref(activeNode);
-    queryRef.onValue(onData, onErr);
+    try {
+      $("#readErr").hidden = true;
+      $("#loadLine").hidden = false;
+      $("#loadLine").textContent = "listening at /" + activeNode + " …";
+      if (queryRef) queryRef.off();
+      queryRef = db.ref(activeNode);
+      queryRef.onValue(onData, onErr);
+    } catch (err) {
+      showJsErr("subscribe(): " + (err && err.message ? err.message : String(err)));
+    }
   }
 
   function onData(snap) {
+    $("#loadLine").hidden = true;
     $("#readErr").hidden = true;
     const val = snap.val();
     if (!val && !nodeProbed) { nodeProbed = true; probeNodes(); }
@@ -270,6 +264,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
 
   function onErr(err) {
     console.error(err);
+    $("#loadLine").hidden = true;
     $("#readErrCode").textContent = err.code || String(err);
     $("#readErr").hidden = false;
   }
@@ -284,7 +279,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     const wa = waLink(e.phone);
     return (
       '<article class="card" data-id="' + esc(e.id) + '">' +
-      '<div class="c-head"><h3>' + esc(e.name || "Unnamed") + '</h3><span class="status" style="--c:' + SCOLOR[st] + '">' + st + "</span></div>" +
+      '<div class="c-head"><h3>' + esc(e.name || "Unnamed") + '</h3><span class="status" style="--c:' + SCOLOR[st] + '">' + esc(st) + "</span></div>" +
       '<p class="when mono">' + d + " · " + esc(e.city || "city —") + "</p>" +
       '<div class="c-contacts">' +
       '<a class="btn ghost sm" href="tel:+91' + esc(String(e.phone || "").replace(/\D/g, "")) + '">📞 call</a>' +
@@ -317,7 +312,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     if (shown.length === 0) {
       $("#empty").hidden = false;
       $("#empty").innerHTML = entries.length === 0
-        ? 'no applications yet ✦ <a class="elink" target="_blank" rel="noopener" href="https://purnendusinha24-design.github.io/friendcall-website/#become-listener">submit a test application from the live site →</a>'
+        ? 'no applications yet ✦ <a target="_blank" rel="noopener" href="https://purnendusinha24-design.github.io/friendcall-website/#become-listener">submit a test application from the live site →</a>'
         : "no applications match ✦";
     } else {
       $("#empty").hidden = true;
@@ -331,18 +326,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     filter = b.dataset.f;
     render();
   });
-
-  $("#search").addEventListener("input", (e) => {
-    query = e.target.value;
-    render();
-  });
-
+  $("#search").addEventListener("input", (e) => { query = e.target.value; render(); });
   $("#list").addEventListener("click", (e) => {
     const cp = e.target.closest("[data-copy]");
-    if (cp) {
-      navigator.clipboard.writeText(cp.dataset.copy).then(() => flash("phone copied ✦"));
-      return;
-    }
+    if (cp) { navigator.clipboard.writeText(cp.dataset.copy).then(() => flash("phone copied ✦")); return; }
     const sb = e.target.closest("[data-status]");
     if (sb) {
       const id = sb.closest(".card").dataset.id;
