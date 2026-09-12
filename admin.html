@@ -237,7 +237,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
       $("#loadLine").textContent = "listening at /" + activeNode + " …";
       if (queryRef) queryRef.off();
       queryRef = db.ref(activeNode);
-      queryRef.onValue(onData, onErr);
+      queryRef.on("value", onData, onErr);
     } catch (err) {
       showJsErr("subscribe(): " + (err && err.message ? err.message : String(err)));
     }
