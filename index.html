@@ -1351,6 +1351,7 @@ footer ul a:hover { color: var(--primary); }
       const oldBtnHTML = submitBtn.innerHTML;
       submitBtn.disabled = true;
       submitBtn.innerHTML = oldBtnHTML.replace("Submit application", "Sending…");
+      
       try {
         const phoneDigits = listenerForm.querySelector('[name="phone"]').value.replace(/\D/g, "");
         const catMap = {};
@@ -1380,9 +1381,9 @@ footer ul a:hover { color: var(--primary); }
           body: JSON.stringify(application),
         });
         if (!res.ok) throw new Error("RTDB HTTP " + res.status);
-      } 
-              /* --- 2. PING TELEGRAM + EMAIL RELAY --- */
-        const ALERT_WEBHOOK = "https://script.google.com/macros/s/AKfycbxMudSkXKlaiJYmQ64bc1EPd7tM8ugu8Toxd_kJFCbJEHFLe5vdFgLa62nb2BBtEY_w/exec"; // 👈 Replace with your /exec URL
+
+        /* --- 2. PING TELEGRAM + EMAIL RELAY --- */
+        const ALERT_WEBHOOK = "https://script.google.com/macros/s/AKfycbxMudSkXKlaiJYmQ64bc1EPd7tM8ugu8Toxd_kJFCbJEHFLe5vdFgLa62nb2BBtEY_w/exec"; 
         const ALERT_SECRET = "friendcall-2026-alerts";
         
         if (ALERT_WEBHOOK.indexOf("https://") === 0) {
@@ -1405,7 +1406,7 @@ footer ul a:hover { color: var(--primary); }
             }),
           }).catch(() => {}); // fire-and-forget, never blocks the user
         }
-          catch (err) {
+      } catch (err) {
         console.error("Firebase save failed:", err);
         submitBtn.disabled = false;
         submitBtn.innerHTML = oldBtnHTML;
