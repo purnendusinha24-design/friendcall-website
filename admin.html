@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FriendCall · Listener Desk</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☎</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#121214; --card:#1e1e22; --card2:#252529; --text:#f5f5f7; --t2:#9a9aa0; --t3:#6e6e73;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14); --input:#2a2a2e;
+  --blue:#2196f3; --gold:#ffb300; --green:#35b86b; --red:#e53935; --sky:#9cc0e8;
+  --disp:"Fraunces",serif; --body:"Instrument Sans",sans-serif; --mono:"Space Mono",monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+.mono{font-family:var(--mono)}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;gap:14px;padding:14px 20px}
+.brand{font-family:var(--disp);font-size:1.2rem;font-weight:700}
+.brand em{font-style:italic;color:var(--blue)}
+.brand .desk{font-family:var(--mono);font-size:.7rem;color:var(--t3);letter-spacing:.14em;text-transform:uppercase}
+.who{margin-left:auto;display:flex;align-items:center;gap:10px}
+.who span{font-size:.72rem;color:var(--t2)}
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:.5em;font-weight:600;font-size:.85rem;border:1.5px solid var(--line2);border-radius:999px;padding:.55em 1.1em;background:var(--card);color:var(--text);transition:transform .15s,background .2s;min-height:38px;cursor:pointer}
+.btn:hover{transform:translateY(-1px);background:var(--card2)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:#42a5f5}
+.btn.ghost{background:transparent}
+.btn.sm{font-size:.75rem;padding:.45em .9em;min-height:34px}
+/* setup note */
+.note{margin:26px 0;border:1px solid var(--line2);border-left:8px solid var(--gold);border-radius:12px;background:var(--card);padding:20px 22px;font-size:.9rem;color:var(--t2)}
+.note b{color:var(--text)}
+.note ol{margin:10px 0 0 18px}
+.note code{font-family:var(--mono);font-size:.78rem;color:var(--sky)}
+/* login */
+.login{max-width:400px;margin:8vh auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px 30px}
+.login h1{font-family:var(--disp);font-size:1.9rem;margin-bottom:6px}
+.login .sub{color:var(--t2);font-size:.9rem;margin-bottom:22px}
+.login label{display:block;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--t2);margin-bottom:14px}
+.login input{display:block;width:100%;margin-top:6px;background:var(--input);border:1.5px solid var(--line2);border-radius:10px;padding:.7em .9em;color:var(--text);font-family:var(--body);font-size:.95rem}
+.login input:focus{outline:2px solid var(--blue)}
+.err{color:var(--red);font-size:.8rem;min-height:1.2em;margin:4px 0 12px;font-family:var(--mono)}
+.login .btn{width:100%;justify-content:center;padding:.8em}
+/* board */
+.bar{display:flex;gap:12px;align-items:center;margin:24px 0 14px;flex-wrap:wrap}
+.search{flex:1;min-width:200px;background:var(--input);border:1.5px solid var(--line2);border-radius:999px;padding:.65em 1.1em;color:var(--text);font-family:var(--body);font-size:.9rem}
+.search:focus{outline:2px solid var(--blue)}
+.live{font-size:.68rem;color:var(--t3)}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.pill{font-family:var(--mono);font-size:.7rem;border:1.5px solid var(--line2);border-radius:999px;padding:.45em 1em;background:var(--card);color:var(--t2);cursor:pointer;transition:all .15s}
+.pill b{color:var(--c,var(--blue));margin-left:.4em}
+.pill.sel{border-color:var(--c,var(--blue));color:var(--text);background:var(--card2)}
+.list{display:flex;flex-direction:column;gap:16px;padding-bottom:60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.c-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.c-head h3{font-family:var(--disp);font-size:1.35rem}
+.status{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--c);border:1.5px solid var(--c);border-radius:999px;padding:.3em .85em}
+.when{font-size:.68rem;color:var(--t3);margin:4px 0 12px}
+.c-contacts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.c-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:.7rem;color:var(--t2);margin-bottom:8px}
+.c-cats{font-size:.68rem;color:var(--sky);margin-bottom:8px}
+.c-about{font-size:.9rem;color:var(--t2);font-style:italic;margin-bottom:8px}
+.c-exp{font-size:.8rem;color:var(--t3);margin-bottom:10px}
+.c-actions{display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px}
+.st{font-family:var(--mono);font-size:.66rem;border:1.5px solid var(--line2);border-radius:999px;padding:.4em .9em;background:transparent;color:var(--t3);cursor:pointer;transition:all .15s}
+.st:hover{color:var(--text);border-color:var(--c)}
+.st.on{background:var(--c);border-color:var(--c);color:#121214;font-weight:700}
+.empty{text-align:center;color:var(--t3);font-family:var(--mono);font-size:.8rem;padding:40px 0}
+/* toast */
+#flash{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);background:var(--card2);border:1px solid var(--line2);border-radius:999px;padding:.6em 1.3em;font-family:var(--mono);font-size:.72rem;color:var(--text);transition:transform .35s;z-index:50}
+#flash.show{transform:translateX(-50%) translateY(0)}
+@media (max-width:560px){ .c-meta{gap:10px} .login{margin:4vh 12px} }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <span class="brand">friend<em>call</em> <span class="desk">· listener desk</span></span>
+    <div class="who" id="whoBar" hidden>
+      <span id="whoEmail" class="mono"></span>
+      <button id="signOut" class="btn ghost sm">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="note" id="setupNote" hidden>
+    <b>One-time setup.</b> This page needs your Firebase web config and an admin user:
+    <ol>
+      <li>Firebase console → <b>Authentication → Sign-in method</b> → enable <b>Email/Password</b>.</li>
+      <li><b>Authentication → Users → Add user</b> → your email + password.</li>
+      <li><b>Project settings → Your apps → Web app</b> → copy <code>firebaseConfig</code> and paste it into the <code>firebaseConfig</code> object at the bottom of this file (replace the <code>PASTE_…</code> values).</li>
+      <li>Update the Realtime Database rules for <code>listener_applications</code> (read: <code>auth != null</code>).</li>
+    </ol>
+  </section>
+
+  <section class="login" id="loginCard" hidden>
+    <h1>Listener Desk</h1>
+    <p class="sub">Sign in to review listener applications.</p>
+    <form id="loginForm">
+      <label>Email<input type="email" id="loginEmail" required autocomplete="username" /></label>
+      <label>Password<input type="password" id="loginPass" required autocomplete="current-password" /></label>
+      <p class="err" id="loginErr"></p>
+      <button class="btn primary" id="loginBtn" type="submit">Sign in</button>
+    </form>
+  </section>
+
+  <section id="board" hidden>
+    <div class="bar">
+      <input id="search" class="search" placeholder="search name, phone, city, email…" />
+      <span class="live mono" id="lastSync"></span>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="list" id="list"></div>
+    <p class="empty" id="empty" hidden>no applications match ✦</p>
+  </section>
+</main>
+
+<div id="flash"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+(function () {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+
+  /* 👇 PASTE YOUR WEB APP CONFIG HERE (Project settings → Your apps) */
+  const firebaseConfig = {
+    apiKey: "PASTE_API_KEY",
+    authDomain: "friendcall-1b979.firebaseapp.com",
+    databaseURL: "https://friendcall-1b979-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "friendcall-1b979",
+    storageBucket: "friendcall-1b979.appspot.com",
+    messagingSenderId: "PASTE_SENDER_ID",
+    appId: "PASTE_APP_ID",
+  };
+  const CONFIG_OK = !String(firebaseConfig.apiKey).startsWith("PASTE");
+  if (!CONFIG_OK) $("#setupNote").hidden = false;
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  const STATUSES = ["pending", "contacted", "screened", "accepted", "rejected"];
+  const SCOLOR = { pending: "var(--gold)", contacted: "var(--blue)", screened: "var(--sky)", accepted: "var(--green)", rejected: "var(--red)" };
+  let allApps = {}, filter = "all", query = "";
+
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  function flash(msg) {
+    const f = $("#flash");
+    f.textContent = msg;
+    f.classList.add("show");
+    clearTimeout(f._t);
+    f._t = setTimeout(() => f.classList.remove("show"), 2200);
+  }
+
+  function waLink(phone) {
+    const d = String(phone || "").replace(/\D/g, "");
+    if (d.length === 10) return "https://wa.me/91" + d;
+    if (d.length === 12 && d.startsWith("91")) return "https://wa.me/" + d;
+    return "";
+  }
+
+  /* ---------- auth ---------- */
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      $("#loginCard").hidden = true;
+      $("#whoBar").hidden = false;
+      $("#whoEmail").textContent = user.email;
+      $("#board").hidden = false;
+      subscribe();
+    } else {
+      $("#board").hidden = true;
+      $("#whoBar").hidden = true;
+      $("#loginCard").hidden = !CONFIG_OK;
+    }
+  });
+
+  $("#loginForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    $("#loginErr").textContent = "";
+    $("#loginBtn").disabled = true;
+    auth
+      .signInWithEmailAndPassword($("#loginEmail").value.trim(), $("#loginPass").value)
+      .catch((err) => {
+        const msgs = {
+          "auth/invalid-credential": "Wrong email or password.",
+          "auth/user-not-found": "No admin user yet — create one in Firebase console → Authentication → Users.",
+          "auth/wrong-password": "Wrong password.",
+          "auth/too-many-requests": "Too many attempts — wait a minute and retry.",
+          "auth/invalid-api-key": "Config problem: paste your real apiKey into this file.",
+        };
+        $("#loginErr").textContent = msgs[err.code] || "Sign-in failed: " + err.code;
+        $("#loginBtn").disabled = false;
+      });
+  });
+
+  $("#signOut").addEventListener("click", () => auth.signOut());
+
+  /* ---------- live data ---------- */
+  function subscribe() {
+    db.ref("listener_applications").onValue(
+      (snap) => {
+        allApps = snap.val() || {};
+        $("#lastSync").textContent = "live · synced " + new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+        render();
+      },
+      (err) => {
+        console.error(err);
+        $("#empty").hidden = false;
+        $("#empty").textContent = "read blocked — check database rules (read: auth != null)";
+      },
+    );
+  }
+
+  /* ---------- render ---------- */
+  function cardHTML(e) {
+    const st = e.status || "pending";
+    const cats = e.categories && typeof e.categories === "object" ? Object.keys(e.categories).join(", ") : Array.isArray(e.categories) ? e.categories.join(", ") : e.categories || "—";
+    const d = e.submittedAt
+      ? new Date(e.submittedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "2-digit", hour: "2-digit", minute: "2-digit", hour12: true })
+      : "date —";
+    const wa = waLink(e.phone);
+    return (
+      '<article class="card" data-id="' + esc(e.id) + '">' +
+      '<div class="c-head"><h3>' + esc(e.name || "Unnamed") + '</h3><span class="status" style="--c:' + SCOLOR[st] + '">' + st + "</span></div>" +
+      '<p class="when mono">' + d + " · " + esc(e.city || "city —") + "</p>" +
+      '<div class="c-contacts">' +
+      '<a class="btn ghost sm" href="tel:+91' + esc(String(e.phone || "").replace(/\D/g, "")) + '">📞 call</a>' +
+      (wa ? '<a class="btn ghost sm" target="_blank" rel="noopener" href="' + wa + '">💬 whatsapp</a>' : "") +
+      '<a class="btn ghost sm" href="mailto:' + esc(e.email || "") + '">✉️ email</a>' +
+      '<button class="btn ghost sm" data-copy="' + esc(e.phone || "") + '">⧉ copy phone</button>' +
+      "</div>" +
+      '<div class="c-meta mono"><span>🗣 ' + esc(e.languages || "—") + "</span><span>🕒 " + esc(e.hours || "—") + "</span><span>🪪 aadhaar •••• " + esc(e.aadhaar_last4 || "????") + "</span></div>" +
+      '<p class="c-cats mono">categories: ' + esc(cats) + "</p>" +
+      (e.about ? '<p class="c-about">"' + esc(e.about) + '"</p>' : "") +
+      (e.experience ? '<p class="c-exp">experience: ' + esc(e.experience) + "</p>" : "") +
+      '<div class="c-actions">' +
+      STATUSES.map((s) => '<button class="st' + (s === st ? " on" : "") + '" data-status="' + s + '" style="--c:' + SCOLOR[s] + '">' + s + "</button>").join("") +
+      "</div></article>"
+    );
+  }
+
+  function render() {
+    const entries = Object.entries(allApps).map(([id, a]) => Object.assign({ id }, a));
+    entries.sort((x, y) => (y.submittedAt || 0) - (x.submittedAt || 0));
+    const counts = { all: entries.length };
+    STATUSES.forEach((s) => (counts[s] = entries.filter((e) => (e.status || "pending") === s).length));
+    $("#stats").innerHTML = ["all"].concat(STATUSES).map((s) => '<button class="pill' + (filter === s ? " sel" : "") + '" data-f="' + s + '" style="--c:' + (SCOLOR[s] || "var(--blue)") + '">' + s + " <b>" + counts[s] + "</b></button>").join("");
+    const q = query.trim().toLowerCase();
+    const shown = entries.filter((e) => {
+      if (filter !== "all" && (e.status || "pending") !== filter) return false;
+      if (!q) return true;
+      return [e.name, e.phone, e.city, e.email, e.languages].join(" ").toLowerCase().includes(q);
+    });
+    $("#empty").hidden = shown.length > 0;
+    if (shown.length === 0) $("#empty").textContent = "no applications match ✦";
+    $("#list").innerHTML = shown.map(cardHTML).join("");
+  }
+
+  $("#stats").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-f]");
+    if (!b) return;
+    filter = b.dataset.f;
+    render();
+  });
+
+  $("#search").addEventListener("input", (e) => {
+    query = e.target.value;
+    render();
+  });
+
+  $("#list").addEventListener("click", (e) => {
+    const cp = e.target.closest("[data-copy]");
+    if (cp) {
+      navigator.clipboard.writeText(cp.dataset.copy).then(() => flash("phone copied ✦"));
+      return;
+    }
+    const sb = e.target.closest("[data-status]");
+    if (sb) {
+      const id = sb.closest(".card").dataset.id;
+      db.ref("listener_applications/" + id).update({
+        status: sb.dataset.status,
+        statusUpdatedAt: firebase.database.ServerValue.TIMESTAMP,
+      });
+      flash("status → " + sb.dataset.status);
+    }
+  });
+})();
+</script>
+</body>
+</html>
