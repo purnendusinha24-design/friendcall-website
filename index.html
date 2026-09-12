@@ -1332,26 +1332,83 @@ footer ul a:hover { color: var(--primary); }
     const aadhaarInput = listenerForm.querySelector('[name="aadhaar"]');
     aadhaarInput.addEventListener("input", () => { const digits = aadhaarInput.value.replace(/\D/g, "").slice(0, 12); aadhaarInput.value = digits.replace(/(\d{4})(?=\d)/g, "$1 "); });
     listenerForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const required = ["name", "phone", "email", "languages", "about", "aadhaar"];
-      const missing = required.filter((n) => !listenerForm.querySelector('[name="' + n + '"]').value.trim());
-      if (missing.length) { toast("Please fill in the required fields ✦"); return; }
-      const aadhaar = (aadhaarInput.value || "").replace(/\D/g, "");
-      if (aadhaar.length !== 12) { toast("Aadhaar must be exactly 12 digits ✦"); return; }
-      const cats = Array.from(listenerForm.querySelectorAll('input[name="cat"]:checked')).map((c) => c.value);
-      if (cats.length === 0) { toast("Pick at least one category you'd listen to ✦"); return; }
+  e.preventDefault();
+  const required = ["name", "phone", "email", "languages", "about", "aadhaar"];
+  const missing = required.filter((n) => !listenerForm.querySelector('[name="' + n + '"]').value.trim());
+  if (missing.length) { toast("Please fill in the required fields ✦"); return; }
+  const aadhaar = (aadhaarInput.value || "").replace(/\D/g, "");
+  if (aadhaar.length !== 12) { toast("Aadhaar must be exactly 12 digits ✦"); return; }
+  const cats = Array.from(listenerForm.querySelectorAll('input[name="cat"]:checked')).map((c) => c.value);
+  if (cats.length === 0) { toast("Pick at least one category you'd listen to ✦"); return; }
 
-      // Firebase Realtime Database integration
-      const RTDB_URL = "https://friendcall-1b979-default-rtdb.asia-southeast1.firebasedatabase.app";
-      const sha256 = async (str) => {
-        const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-        return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-      };
-      const submitBtn = $("#formSubmit");
-      const oldBtnHTML = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = oldBtnHTML.replace("Submit application", "Sending…");
-      
+  /* --- SAVE TO FIREBASE + PING TELEGRAM/EMAIL RELAY --- */
+  const RTDB_URL = "https://friendcall-1b979-default-rtdb.asia-southeast1.firebasedatabase.app";
+  const ALERT_WEBHOOK = "https://script.google.com/macros/s/AKfycbxMudSkXKlaiJYmQ64bc1EPd7tM8ugu8Toxd_kJFCbJEHFLe5vdFgLa62nb2BBtEY_w/exec";
+  const ALERT_SECRET = "friendcall-2026-alerts";
+  const sha256 = async (str) => {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  };
+  const submitBtn = $("#formSubmit");
+  const oldBtnHTML = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = oldBtnHTML.replace("Submit application", "Sending…");
+  try {
+    const phoneDigits = listenerForm.querySelector('[name="phone"]').value.replace(/\D/g, "");
+    const catMap = {};
+    cats.forEach((c) => (catMap[c] = true));
+    const appId = "app_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+    const application = {
+      id: appId,
+      name: listenerForm.querySelector('[name="name"]').value.trim(),
+      phone: phoneDigits,
+      phone_display: listenerForm.querySelector('[name="phone"]').value.trim(),
+      email: listenerForm.querySelector('[name="email"]').value.trim(),
+      city: listenerForm.querySelector('[name="city"]').value.trim(),
+      aadhaar_hash: await sha256(aadhaar),
+      aadhaar_last4: aadhaar.slice(-4),
+      languages: listenerForm.querySelector('[name="languages"]').value.trim(),
+      categories: catMap,
+      about: listenerForm.querySelector('[name="about"]').value.trim(),
+      experience: listenerForm.querySelector('[name="experience"]').value.trim(),
+      hours: listenerForm.querySelector('[name="hours"]').value.trim(),
+      status: "pending",
+      source: "website",
+      submittedAt: { ".sv": "timestamp" },
+    };
+    const res = await fetch(RTDB_URL + "/listener_applications/" + appId + ".json", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(application),
+    });
+    if (!res.ok) throw new Error("RTDB HTTP " + res.status);
+    fetch(ALERT_WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        secret: ALERT_SECRET,
+        app: {
+          id: appId, name: application.name, phone: phoneDigits,
+          email: application.email, city: application.city,
+          languages: application.languages, categories: cats,
+          hours: application.hours, about: application.about,
+        },
+      }),
+    }).catch(() => {}); /* fire-and-forget: never blocks the applicant */
+  } catch (err) {
+    console.error("Save failed:", err);
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = oldBtnHTML;
+    toast("<b>Couldn't reach the line.</b> Check your connection and try again ✦");
+    return;
+  }
+
+  listenerForm.classList.add("submitted");
+  $("#formSuccess").hidden = false;
+  toast("<b>Application received.</b> We'll WhatsApp you within a week ✦");
+  setTimeout(() => $("#formSuccess").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" }), 100);
+});
+    
       try {
         const phoneDigits = listenerForm.querySelector('[name="phone"]').value.replace(/\D/g, "");
         const catMap = {};
