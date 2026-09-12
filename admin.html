@@ -98,7 +98,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     <ol>
       <li>Firebase console → <b>Authentication → Sign-in method</b> → enable <b>Email/Password</b>.</li>
       <li><b>Authentication → Users → Add user</b> → your email + password.</li>
-      <li><b>Project settings → Your apps → Web app</b> → copy <code>firebaseConfig</code> and paste it into the <code>firebaseConfig</code> object at the bottom of this file (replace the <code>PASTE_…</code> values).</li>
+      <li><b>Project settings → Your apps → Web app</b> → copy <code>firebaseConfig</code> and paste it into the <code>firebaseConfig</code> object at the bottom of this file.</li>
       <li>Update the Realtime Database rules for <code>listener_applications</code> (read: <code>auth != null</code>).</li>
     </ol>
   </section>
@@ -135,16 +135,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
   "use strict";
   const $ = (s) => document.querySelector(s);
 
-  /* 👇 PASTE YOUR WEB APP CONFIG HERE (Project settings → Your apps) */
+  /* ✅ FIREBASE CONFIG WIRED IN */
   const firebaseConfig = {
-    apiKey: "PASTE_API_KEY",
+    apiKey: "AIzaSyAsvZQy7bgbTzeKTd6XYAqQnk-xySEmtCk",
     authDomain: "friendcall-1b979.firebaseapp.com",
     databaseURL: "https://friendcall-1b979-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "friendcall-1b979",
-    storageBucket: "friendcall-1b979.appspot.com",
-    messagingSenderId: "PASTE_SENDER_ID",
-    appId: "PASTE_APP_ID",
+    storageBucket: "friendcall-1b979.firebasestorage.app",
+    messagingSenderId: "874370740998",
+    appId: "1:874370740998:web:200dedf989833fa6212487",
+    measurementId: "G-RNP2M5DB56"
   };
+  
   const CONFIG_OK = !String(firebaseConfig.apiKey).startsWith("PASTE");
   if (!CONFIG_OK) $("#setupNote").hidden = false;
 
@@ -200,7 +202,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
           "auth/user-not-found": "No admin user yet — create one in Firebase console → Authentication → Users.",
           "auth/wrong-password": "Wrong password.",
           "auth/too-many-requests": "Too many attempts — wait a minute and retry.",
-          "auth/invalid-api-key": "Config problem: paste your real apiKey into this file.",
+          "auth/invalid-api-key": "Config problem: check your apiKey.",
         };
         $("#loginErr").textContent = msgs[err.code] || "Sign-in failed: " + err.code;
         $("#loginBtn").disabled = false;
