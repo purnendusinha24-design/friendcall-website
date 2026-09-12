@@ -1380,7 +1380,32 @@ footer ul a:hover { color: var(--primary); }
           body: JSON.stringify(application),
         });
         if (!res.ok) throw new Error("RTDB HTTP " + res.status);
-      } catch (err) {
+      } 
+              /* --- 2. PING TELEGRAM + EMAIL RELAY --- */
+        const ALERT_WEBHOOK = "PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE"; // 👈 Replace with your /exec URL
+        const ALERT_SECRET = "friendcall-2026-alerts";
+        
+        if (ALERT_WEBHOOK.indexOf("https://") === 0) {
+          fetch(ALERT_WEBHOOK, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              secret: ALERT_SECRET,
+              app: {
+                id: appId, 
+                name: application.name, 
+                phone: phoneDigits,
+                email: application.email, 
+                city: application.city,
+                languages: application.languages, 
+                categories: cats,
+                hours: application.hours, 
+                about: application.about,
+              },
+            }),
+          }).catch(() => {}); // fire-and-forget, never blocks the user
+        }
+          catch (err) {
         console.error("Firebase save failed:", err);
         submitBtn.disabled = false;
         submitBtn.innerHTML = oldBtnHTML;
