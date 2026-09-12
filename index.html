@@ -1382,7 +1382,7 @@ footer ul a:hover { color: var(--primary); }
         if (!res.ok) throw new Error("RTDB HTTP " + res.status);
       } 
               /* --- 2. PING TELEGRAM + EMAIL RELAY --- */
-        const ALERT_WEBHOOK = "PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE"; // 👈 Replace with your /exec URL
+        const ALERT_WEBHOOK = "https://script.google.com/macros/s/AKfycbxMudSkXKlaiJYmQ64bc1EPd7tM8ugu8Toxd_kJFCbJEHFLe5vdFgLa62nb2BBtEY_w/exec"; // 👈 Replace with your /exec URL
         const ALERT_SECRET = "friendcall-2026-alerts";
         
         if (ALERT_WEBHOOK.indexOf("https://") === 0) {
