@@ -32,7 +32,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
 .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
 .btn.ghost{background:transparent}
 .btn.sm{font-size:.75rem;padding:.45em .9em;min-height:34px}
-  a { color: inherit; text-decoration: none; }
+a { color: inherit; text-decoration: none; }
 /* login */
 .login{max-width:400px;margin:8vh auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px 30px}
 .login h1{font-family:var(--disp);font-size:1.9rem;margin-bottom:6px}
@@ -43,7 +43,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
 .err{color:var(--red);font-size:.8rem;min-height:1.2em;margin:4px 0 12px;font-family:var(--mono)}
 .login .btn{width:100%;justify-content:center;padding:.8em}
 /* board */
-.bar{display:flex;gap:12px;align-items:center;margin:24px 0 14px;flex-wrap:wrap}
+.bar{display:flex;gap:8px;align-items:center;margin:24px 0 14px;flex-wrap:wrap}
 .search{flex:1;min-width:200px;background:var(--input);border:1.5px solid var(--line2);border-radius:999px;padding:.65em 1.1em;color:var(--text);font-family:var(--body);font-size:.9rem}
 .search:focus{outline:2px solid var(--blue)}
 .live{font-size:.68rem;color:var(--t3)}
@@ -107,6 +107,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
   <section id="board" hidden>
     <div class="bar">
       <input id="search" class="search" placeholder="search name, phone, city, email…" />
+      <button id="exportBtn" class="btn ghost sm" title="Export visible list to CSV">⬇ CSV</button>
+      <button id="purgeBtn" class="btn ghost sm" style="color:var(--red); border-color:var(--red)" title="Delete aadhaar data from apps older than 30 days">🗑 Purge</button>
       <span class="live mono" id="connState">…</span>
       <span class="live mono" id="lastSync"></span>
     </div>
@@ -139,7 +141,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
 
-  /* ✅ your web app config */
   const firebaseConfig = {
     apiKey: "AIzaSyAsvZQy7bgbTzeKTd6XYAqQnk-xySEmtCk",
     authDomain: "friendcall-1b979.firebaseapp.com",
@@ -156,6 +157,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
 
   const STATUSES = ["pending", "contacted", "screened", "accepted", "rejected"];
   const SCOLOR = { pending: "var(--gold)", contacted: "var(--blue)", screened: "var(--sky)", accepted: "var(--green)", rejected: "var(--red)" };
+  
+  /* Step D: Privacy window (30 days) */
+  const PURGE_MS = 30 * 24 * 60 * 60 * 1000; 
+
   let allApps = {}, filter = "all", query = "";
   let activeNode = "listener_applications";
   let nodeProbed = false;
@@ -175,7 +180,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     $("#jsErr").hidden = false;
     $("#loadLine").hidden = true;
   }
-  /* surface ANY uncaught error instead of failing silently */
   window.addEventListener("error", (e) => showJsErr(e.message || String(e.error)));
   window.addEventListener("unhandledrejection", (e) => showJsErr(String((e.reason && e.reason.message) || e.reason)));
 
@@ -186,7 +190,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     return "";
   }
 
-  /* ---------- auth ---------- */
   auth.onAuthStateChanged((user) => {
     if (user) {
       $("#loginCard").hidden = true;
@@ -221,7 +224,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
   });
   $("#signOut").addEventListener("click", () => auth.signOut());
 
-  /* ---------- connection state ---------- */
   function watchConnection() {
     db.ref(".info/connected").on("value", (s) => {
       const el = $("#connState");
@@ -230,7 +232,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     });
   }
 
-  /* ---------- live data (never silent) ---------- */
   function subscribe() {
     try {
       $("#readErr").hidden = true;
@@ -252,6 +253,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     allApps = val || {};
     $("#lastSync").textContent = "/" + activeNode + " · synced " + new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
     render();
+    /* Step D: Auto-purge on load (silent) */
+    if (!window._purgedOnce) { window._purgedOnce = true; runPurge(false); }
   }
 
   function probeNodes() {
@@ -270,6 +273,87 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     $("#readErr").hidden = false;
   }
 
+  /* ---------- Step D: Privacy Engine (Purge) ---------- */
+  async function runPurge(manual = false) {
+    const now = Date.now();
+    const updates = {};
+    let count = 0;
+
+    Object.entries(allApps).forEach(([id, app]) => {
+      const age = now - (app.submittedAt || 0);
+      if (age > PURGE_MS && (app.aadhaar_hash || app.aadhaar_last4)) {
+        updates[`${activeNode}/${id}/aadhaar_hash`] = null;
+        updates[`${activeNode}/${id}/aadhaar_last4`] = null;
+        updates[`${activeNode}/${id}/purgedAt`] = firebase.database.ServerValue.TIMESTAMP;
+        count++;
+      }
+    });
+
+    if (count > 0) {
+      try {
+        await db.ref().update(updates);
+        flash(`Purged aadhaar from ${count} old app(s) ✦`);
+        Object.keys(updates).forEach(path => {
+          const parts = path.split("/");
+          const appId = parts[1];
+          const field = parts[2];
+          if (allApps[appId]) {
+             if (field === "purgedAt") allApps[appId][field] = now;
+             else allApps[appId][field] = null;
+          }
+        });
+        render();
+      } catch (err) {
+        flash("Purge failed: " + err.message);
+      }
+    } else if (manual) {
+      flash("No old aadhaar data to purge ✦");
+    }
+  }
+
+  /* ---------- Step D: CSV Export ---------- */
+  function exportCSV() {
+    const entries = Object.entries(allApps).map(([id, a]) => Object.assign({ id }, a));
+    entries.sort((x, y) => (y.submittedAt || 0) - (x.submittedAt || 0));
+    
+    const q = query.trim().toLowerCase();
+    const shown = entries.filter((e) => {
+      if (filter !== "all" && (e.status || "pending") !== filter) return false;
+      if (!q) return true;
+      return [e.name, e.phone, e.city, e.email, e.languages].join(" ").toLowerCase().includes(q);
+    });
+
+    if (shown.length === 0) { flash("Nothing to export ✦"); return; }
+
+    const headers = ["Submitted (IST)", "Name", "Phone", "Email", "City", "Languages", "Categories", "Hours", "Experience", "About", "Status"];
+    const rows = shown.map(e => {
+      const d = e.submittedAt ? new Date(e.submittedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "";
+      const cats = e.categories && typeof e.categories === "object" ? Object.keys(e.categories).join(", ") : (e.categories || "");
+      return [
+        d, e.name, e.phone, e.email, e.city, e.languages, cats, e.hours, e.experience, e.about, e.status
+      ].map(v => {
+        v = String(v == null ? "" : v);
+        if (v.includes(",") || v.includes('"') || v.includes("\n")) {
+          return '"' + v.replace(/"/g, '""') + '"';
+        }
+        return v;
+      });
+    });
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const dateStr = new Date().toISOString().slice(0, 10);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `friendcall-applications-${dateStr}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    flash(`Exported ${shown.length} applications ✦`);
+  }
+
   /* ---------- render ---------- */
   function cardHTML(e) {
     const st = e.status || "pending";
@@ -278,6 +362,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
       ? new Date(e.submittedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "2-digit", hour: "2-digit", minute: "2-digit", hour12: true })
       : "date —";
     const wa = waLink(e.phone);
+    
+    /* Step D: Show "purged" if data was deleted */
+    const aadhaarDisplay = e.purgedAt ? "purged" : (e.aadhaar_last4 ? "•••• " + e.aadhaar_last4 : "missing");
+
     return (
       '<article class="card" data-id="' + esc(e.id) + '">' +
       '<div class="c-head"><h3>' + esc(e.name || "Unnamed") + '</h3><span class="status" style="--c:' + SCOLOR[st] + '">' + esc(st) + "</span></div>" +
@@ -288,7 +376,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
       '<a class="btn ghost sm" href="mailto:' + esc(e.email || "") + '">✉️ email</a>' +
       '<button class="btn ghost sm" data-copy="' + esc(e.phone || "") + '">⧉ copy phone</button>' +
       "</div>" +
-      '<div class="c-meta mono"><span>🗣 ' + esc(e.languages || "—") + "</span><span>🕒 " + esc(e.hours || "—") + "</span><span>🪪 aadhaar •••• " + esc(e.aadhaar_last4 || "????") + "</span></div>" +
+      '<div class="c-meta mono"><span>🗣 ' + esc(e.languages || "—") + "</span><span>🕒 " + esc(e.hours || "—") + "</span><span>🪪 aadhaar " + esc(aadhaarDisplay) + "</span></div>" +
       '<p class="c-cats mono">categories: ' + esc(cats) + "</p>" +
       (e.about ? '<p class="c-about">"' + esc(e.about) + '"</p>' : "") +
       (e.experience ? '<p class="c-exp">experience: ' + esc(e.experience) + "</p>" : "") +
@@ -328,6 +416,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16
     render();
   });
   $("#search").addEventListener("input", (e) => { query = e.target.value; render(); });
+  
+  /* Step D: Buttons */
+  $("#exportBtn").addEventListener("click", exportCSV);
+  $("#purgeBtn").addEventListener("click", () => runPurge(true));
+
   $("#list").addEventListener("click", (e) => {
     const cp = e.target.closest("[data-copy]");
     if (cp) { navigator.clipboard.writeText(cp.dataset.copy).then(() => flash("phone copied ✦")); return; }
