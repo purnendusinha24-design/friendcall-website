@@ -1335,7 +1335,7 @@ footer ul a:hover { color: var(--primary); }
       aadhaarInput.value = digits.replace(/(\d{4})(?=\d)/g, "$1 ");
     });
 
-    listenerForm.addEventListener("submit", async (e) => {
+        listenerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const required = ["name", "phone", "email", "languages", "about", "aadhaar"];
       const missing = required.filter((n) => !listenerForm.querySelector('[name="' + n + '"]').value.trim());
@@ -1359,10 +1359,29 @@ footer ul a:hover { color: var(--primary); }
       const submitBtn = $("#formSubmit");
       const oldBtnHTML = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = oldBtnHTML.replace("Submit application", "Sending…");
+      submitBtn.innerHTML = oldBtnHTML.replace("Submit application", "Checking…");
       
+      const phoneDigits = listenerForm.querySelector('[name="phone"]').value.replace(/\D/g, "");
+
       try {
-        const phoneDigits = listenerForm.querySelector('[name="phone"]').value.replace(/\D/g, "");
+        /* --- STEP C: DUPLICATE-PHONE GUARD --- */
+        const idxRes = await fetch(RTDB_URL + "/application_phones/" + phoneDigits + ".json", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ appId: "pending", at: { ".sv": "timestamp" } }),
+        });
+        
+        // If Firebase rejects the write (because the number already exists in the index)
+        if (!idxRes.ok) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = oldBtnHTML;
+          toast("This number has already applied ✦ We'll be in touch soon — no need to apply twice.");
+          listenerForm.querySelector('[name="phone"]').focus();
+          return;
+        }
+
+        submitBtn.innerHTML = oldBtnHTML.replace("Submit application", "Sending…");
+
         const catMap = {};
         cats.forEach((c) => (catMap[c] = true));
         const appId = "app_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
@@ -1393,6 +1412,14 @@ footer ul a:hover { color: var(--primary); }
         });
         if (!res.ok) throw new Error("RTDB HTTP " + res.status);
 
+        // Update the index node with the real application ID now that it's saved
+        fetch(RTDB_URL + "/application_phones/" + phoneDigits + ".json", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ appId: appId }),
+        }).catch(() => {});
+
+        // Ping Telegram + Email Relay
         fetch(ALERT_WEBHOOK, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -1414,6 +1441,9 @@ footer ul a:hover { color: var(--primary); }
         
       } catch (err) {
         console.error("Save failed:", err);
+        // Free the phone number index so they can retry if the network failed halfway
+        fetch(RTDB_URL + "/application_phones/" + phoneDigits + ".json", { method: "DELETE" }).catch(() => {});
+        
         submitBtn.disabled = false;
         submitBtn.innerHTML = oldBtnHTML;
         toast("<b>Couldn't reach the line.</b> Check your connection and try again ✦");
