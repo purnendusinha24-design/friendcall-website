@@ -421,18 +421,24 @@ a { color: inherit; text-decoration: none; }
   $("#exportBtn").addEventListener("click", exportCSV);
   $("#purgeBtn").addEventListener("click", () => runPurge(true));
 
-    $("#list").addEventListener("click", (e) => {
+      $("#list").addEventListener("click", (e) => {
+    // Handle Copy Phone
     const cp = e.target.closest("[data-copy]");
     if (cp) { 
       navigator.clipboard.writeText(cp.dataset.copy).then(() => flash("phone copied ✦")); 
       return; 
     }
     
+    // Handle Status Change
     const sb = e.target.closest("[data-status]");
     if (sb) {
       const card = sb.closest(".card");
       const id = card.dataset.id;
       const newStatus = sb.dataset.status;
+      
+      // Prevent double-clicks
+      sb.disabled = true;
+      sb.style.opacity = "0.5";
 
       // 1. Update Firebase (keeps the Admin Panel UI working instantly)
       db.ref(activeNode + "/" + id).update({
@@ -440,17 +446,35 @@ a { color: inherit; text-decoration: none; }
         statusUpdatedAt: firebase.database.ServerValue.TIMESTAMP,
       });
 
-      // 2. ✅ NEW: Sync the status change to MongoDB
-      // ⚠️ Make sure this matches your current ngrok URL or local IP!
-      const BACKEND_URL = "https://financial-parabola-diving.ngrok-free.dev"; 
+      // 2. ✅ Sync the status change to MongoDB
+      const BACKEND_URL = "https://financial-parabola-diving.ngrok-free.dev"; // ⚠️ Update if your ngrok URL changed
       
       fetch(`${BACKEND_URL}/api/applications/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus })
-      }).catch(err => console.error("Failed to sync status to MongoDB:", err));
-
-      flash("status → " + newStatus);
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (newStatus === "accepted") {
+          // If accepted, the backend deletes the app. Animate and remove it from UI.
+          card.style.transition = "opacity 0.3s, transform 0.3s";
+          card.style.opacity = "0";
+          card.style.transform = "translateY(-10px)";
+          setTimeout(() => card.remove(), 300);
+          flash("✅ Accepted! User created & application removed.");
+        } else {
+          flash("Status updated to " + newStatus + " ✦");
+        }
+      })
+      .catch(err => {
+        console.error("Failed to sync status to MongoDB:", err);
+        flash("⚠️ UI updated, but failed to sync to MongoDB.");
+      })
+      .finally(() => {
+        sb.disabled = false;
+        sb.style.opacity = "1";
+      });
     }
   });
 })();
