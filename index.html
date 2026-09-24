@@ -1391,8 +1391,10 @@ html { -webkit-tap-highlight-color: transparent; }
       aadhaarInput.value = digits.replace(/(\d{4})(?=\d)/g, "$1 ");
     });
 
-        listenerForm.addEventListener("submit", async (e) => {
+    listenerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      
+      // 1. Validate required fields
       const required = ["name", "phone", "email", "languages", "about", "aadhaar"];
       const missing = required.filter((n) => !listenerForm.querySelector('[name="' + n + '"]').value.trim());
       if (missing.length) { toast("Please fill in the required fields ✦"); return; }
@@ -1403,113 +1405,60 @@ html { -webkit-tap-highlight-color: transparent; }
       const cats = Array.from(listenerForm.querySelectorAll('input[name="cat"]:checked')).map((c) => c.value);
       if (cats.length === 0) { toast("Pick at least one category you'd listen to ✦"); return; }
 
-      const RTDB_URL = "https://friendcall-1b979-default-rtdb.asia-southeast1.firebasedatabase.app";
-      const ALERT_WEBHOOK = "https://script.google.com/macros/s/AKfycbxMudSkXKlaiJYmQ64bc1EPd7tM8ugu8Toxd_kJFCbJEHFLe5vdFgLa62nb2BBtEY_w/exec";
-      const ALERT_SECRET = "friendcall-2026-alerts";
-      
-      const sha256 = async (str) => {
-        const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-        return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-      };
-      
+      // 2. UI Loading State
       const submitBtn = $("#formSubmit");
       const oldBtnHTML = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = oldBtnHTML.replace("Submit application", "Checking…");
-      
-      const phoneDigits = listenerForm.querySelector('[name="phone"]').value.replace(/\D/g, "");
+      submitBtn.innerHTML = oldBtnHTML.replace("Submit application", "Sending…");
+
+      // 3. Prepare clean, secure data for the backend
+      const formData = {
+        name: listenerForm.querySelector('[name="name"]').value.trim(),
+        phone: listenerForm.querySelector('[name="phone"]').value.replace(/\D/g, ""),
+        email: listenerForm.querySelector('[name="email"]').value.trim(),
+        city: listenerForm.querySelector('[name="city"]').value.trim(),
+        aadhaar_last4: aadhaar.slice(-4), // ✅ Secure: only send last 4 digits
+        languages: listenerForm.querySelector('[name="languages"]').value.trim(),
+        categories: cats,
+        about: listenerForm.querySelector('[name="about"]').value.trim(),
+        experience: listenerForm.querySelector('[name="experience"]').value.trim(),
+        hours: listenerForm.querySelector('[name="hours"]').value.trim(),
+      };
 
       try {
-        /* --- STEP C: DUPLICATE-PHONE GUARD --- */
-        const idxRes = await fetch(RTDB_URL + "/application_phones/" + phoneDigits + ".json", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ appId: "pending", at: { ".sv": "timestamp" } }),
-        });
+        // ✅ Replace with your actual ngrok URL or local IP (e.g., http://192.168.1.5:5001)
+        const BACKEND_URL = "https://financial-parabola-diving.ngrok-free.dev"; 
         
-        // If Firebase rejects the write (because the number already exists in the index)
-        if (!idxRes.ok) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = oldBtnHTML;
-          toast("This number has already applied ✦ We'll be in touch soon — no need to apply twice.");
-          listenerForm.querySelector('[name="phone"]').focus();
-          return;
+        // 4. Send to Node.js Backend
+        const res = await fetch(BACKEND_URL + "/api/applications", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          throw new Error(result.message || "Failed to submit");
         }
 
-        submitBtn.innerHTML = oldBtnHTML.replace("Submit application", "Sending…");
+        // 5. Success State
+        listenerForm.classList.add("submitted");
+        $("#formSuccess").hidden = false;
+        toast("<b>Application received.</b> We'll WhatsApp you within a week ✦");
+        setTimeout(() => $("#formSuccess").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" }), 100);
 
-        const catMap = {};
-        cats.forEach((c) => (catMap[c] = true));
-        const appId = "app_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
-        
-        const application = {
-          id: appId,
-          name: listenerForm.querySelector('[name="name"]').value.trim(),
-          phone: phoneDigits,
-          phone_display: listenerForm.querySelector('[name="phone"]').value.trim(),
-          email: listenerForm.querySelector('[name="email"]').value.trim(),
-          city: listenerForm.querySelector('[name="city"]').value.trim(),
-          aadhaar_hash: await sha256(aadhaar),
-          aadhaar_last4: aadhaar.slice(-4),
-          languages: listenerForm.querySelector('[name="languages"]').value.trim(),
-          categories: catMap,
-          about: listenerForm.querySelector('[name="about"]').value.trim(),
-          experience: listenerForm.querySelector('[name="experience"]').value.trim(),
-          hours: listenerForm.querySelector('[name="hours"]').value.trim(),
-          status: "pending",
-          source: "website",
-          submittedAt: { ".sv": "timestamp" },
-        };
-        
-        const res = await fetch(RTDB_URL + "/listener_applications/" + appId + ".json", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(application),
-        });
-        if (!res.ok) throw new Error("RTDB HTTP " + res.status);
-
-        // Update the index node with the real application ID now that it's saved
-        fetch(RTDB_URL + "/application_phones/" + phoneDigits + ".json", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ appId: appId }),
-        }).catch(() => {});
-
-        // Ping Telegram + Email Relay
-        fetch(ALERT_WEBHOOK, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            secret: ALERT_SECRET,
-            app: {
-              id: appId, 
-              name: application.name, 
-              phone: phoneDigits,
-              email: application.email, 
-              city: application.city,
-              languages: application.languages, 
-              categories: cats,
-              hours: application.hours, 
-              about: application.about,
-            },
-          }),
-        }).catch(() => {});
-        
       } catch (err) {
         console.error("Save failed:", err);
-        // Free the phone number index so they can retry if the network failed halfway
-        fetch(RTDB_URL + "/application_phones/" + phoneDigits + ".json", { method: "DELETE" }).catch(() => {});
-        
         submitBtn.disabled = false;
         submitBtn.innerHTML = oldBtnHTML;
-        toast("<b>Couldn't reach the line.</b> Check your connection and try again ✦");
-        return;
+        
+        if (err.message && err.message.includes("already applied")) {
+          toast("This number has already applied ✦ We'll be in touch soon.");
+        } else {
+          toast("<b>Couldn't reach the line.</b> Check your connection and try again ✦");
+        }
       }
-
-      listenerForm.classList.add("submitted");
-      $("#formSuccess").hidden = false;
-      toast("<b>Application received.</b> We'll WhatsApp you within a week ✦");
-      setTimeout(() => $("#formSuccess").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" }), 100);
     });
   }
 
