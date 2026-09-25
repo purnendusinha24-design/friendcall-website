@@ -419,10 +419,10 @@ a { color: inherit; text-decoration: none; }
   $("#exportBtn").addEventListener("click", exportCSV);
   $("#purgeBtn").addEventListener("click", () => runPurge(true));
 
-        $("#list").addEventListener("click", (e) => {
+    $("#list").addEventListener("click", (e) => {
     const cp = e.target.closest("[data-copy]");
     if (cp) { 
-      navigator.clipboard.writeText(cp.dataset.copy).then(() => flash("phone copied ")); 
+      navigator.clipboard.writeText(cp.dataset.copy).then(() => flash("phone copied ✦")); 
       return; 
     }
     
@@ -445,7 +445,7 @@ a { color: inherit; text-decoration: none; }
       });
 
       // 2. Send to Node.js Backend with BOTH id and phone
-      const BACKEND_URL = "https://financial-parabola-diving.ngrok-free.dev";
+      const BACKEND_URL = "https://financial-parabola-diving.ngrok-free.dev"; // ⚠️ Update if your ngrok URL changed
       
       fetch(`${BACKEND_URL}/api/applications/${id}/status`, {
         method: "PATCH",
@@ -477,7 +477,6 @@ a { color: inherit; text-decoration: none; }
       });
     }
   });
-    }
 })();
 </script>
 </body>
