@@ -355,19 +355,17 @@ a { color: inherit; text-decoration: none; }
   }
 
   /* ---------- render ---------- */
-  function cardHTML(e) {
+    function cardHTML(e) {
     const st = e.status || "pending";
     const cats = e.categories && typeof e.categories === "object" ? Object.keys(e.categories).join(", ") : Array.isArray(e.categories) ? e.categories.join(", ") : e.categories || "—";
     const d = e.submittedAt
       ? new Date(e.submittedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "2-digit", hour: "2-digit", minute: "2-digit", hour12: true })
       : "date —";
     const wa = waLink(e.phone);
-    
-    /* Step D: Show "purged" if data was deleted */
     const aadhaarDisplay = e.purgedAt ? "purged" : (e.aadhaar_last4 ? "•••• " + e.aadhaar_last4 : "missing");
 
     return (
-      '<article class="card" data-id="' + esc(e.id) + '">' +
+      '<article class="card" data-id="' + esc(e.id) + '" data-phone="' + esc(e.phone || "") + '">' +
       '<div class="c-head"><h3>' + esc(e.name || "Unnamed") + '</h3><span class="status" style="--c:' + SCOLOR[st] + '">' + esc(st) + "</span></div>" +
       '<p class="when mono">' + d + " · " + esc(e.city || "city —") + "</p>" +
       '<div class="c-contacts">' +
@@ -376,7 +374,7 @@ a { color: inherit; text-decoration: none; }
       '<a class="btn ghost sm" href="mailto:' + esc(e.email || "") + '">✉️ email</a>' +
       '<button class="btn ghost sm" data-copy="' + esc(e.phone || "") + '">⧉ copy phone</button>' +
       "</div>" +
-      '<div class="c-meta mono"><span>🗣 ' + esc(e.languages || "—") + "</span><span>🕒 " + esc(e.hours || "—") + "</span><span>🪪 aadhaar " + esc(aadhaarDisplay) + "</span></div>" +
+      '<div class="c-meta mono"><span>🗣 ' + esc(e.languages || "—") + "</span><span> " + esc(e.hours || "—") + "</span><span>🪪 aadhaar " + esc(aadhaarDisplay) + "</span></div>" +
       '<p class="c-cats mono">categories: ' + esc(cats) + "</p>" +
       (e.about ? '<p class="c-about">"' + esc(e.about) + '"</p>' : "") +
       (e.experience ? '<p class="c-exp">experience: ' + esc(e.experience) + "</p>" : "") +
