@@ -421,43 +421,45 @@ a { color: inherit; text-decoration: none; }
   $("#exportBtn").addEventListener("click", exportCSV);
   $("#purgeBtn").addEventListener("click", () => runPurge(true));
 
-      $("#list").addEventListener("click", (e) => {
-    // Handle Copy Phone
+        $("#list").addEventListener("click", (e) => {
     const cp = e.target.closest("[data-copy]");
     if (cp) { 
-      navigator.clipboard.writeText(cp.dataset.copy).then(() => flash("phone copied ✦")); 
+      navigator.clipboard.writeText(cp.dataset.copy).then(() => flash("phone copied ")); 
       return; 
     }
     
-    // Handle Status Change
     const sb = e.target.closest("[data-status]");
     if (sb) {
       const card = sb.closest(".card");
       const id = card.dataset.id;
       const newStatus = sb.dataset.status;
       
-      // Prevent double-clicks
+      // Get the phone number from the card's data attribute
+      const phone = card.dataset.phone;
+
       sb.disabled = true;
       sb.style.opacity = "0.5";
 
-      // 1. Update Firebase (keeps the Admin Panel UI working instantly)
+      // 1. Update Firebase
       db.ref(activeNode + "/" + id).update({
         status: newStatus,
         statusUpdatedAt: firebase.database.ServerValue.TIMESTAMP,
       });
 
-      // 2. ✅ Sync the status change to MongoDB
-      const BACKEND_URL = "https://financial-parabola-diving.ngrok-free.dev"; // ⚠️ Update if your ngrok URL changed
+      // 2. Send to Node.js Backend with BOTH id and phone
+      const BACKEND_URL = "https://financial-parabola-diving.ngrok-free.dev";
       
       fetch(`${BACKEND_URL}/api/applications/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ 
+          status: newStatus,
+          phone: phone  // ✅ Send phone number as fallback
+        })
       })
       .then(res => res.json())
       .then(data => {
         if (newStatus === "accepted") {
-          // If accepted, the backend deletes the app. Animate and remove it from UI.
           card.style.transition = "opacity 0.3s, transform 0.3s";
           card.style.opacity = "0";
           card.style.transform = "translateY(-10px)";
@@ -475,6 +477,8 @@ a { color: inherit; text-decoration: none; }
         sb.disabled = false;
         sb.style.opacity = "1";
       });
+    }
+  });
     }
   });
 })();
